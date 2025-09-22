@@ -23,7 +23,7 @@ resource "docker_image" "quiz_app" {
 
   triggers = {
    # app_code = filesha256("${path.module}/../Iac-quiz/app.py")
-   app_code = filesha256("/home/vagrant/Iac-deployment/IaC-quiz/app.py")
+   app_code = filesha256("${path.module}/IaC-quiz/app.py")
 
   }
   keep_locally = false
@@ -49,14 +49,14 @@ resource "docker_container" "quiz_app" {
 }
 
 
-variable "app_port" {
-  description = "Port to expose quiz app"
-  type        = number
-  default     = 8080
-}
+# variable "app_port" {
+#   description = "Port to expose quiz app"
+#   type        = number
+#   default     = 8080
+# }
 
 
 
-data "external" "host_ip" {
-  program = ["${path.module}/get_ip.sh"]
-}
+# data "external" "host_ip" {
+#   program = ["${path.module}/get_ip.sh"]
+# }

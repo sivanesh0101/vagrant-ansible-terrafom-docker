@@ -336,7 +336,92 @@ So when you run `terraform destroy`, it only destroys what’s in the state (`do
    terraform destroy # will now clean up both image & container
    ```
 
----
+
+## 🔹 Run the GitHub Runner from local registry (offline-friendly)
+
+If your internet is unreliable, you can use a prebuilt Docker image of the GitHub Actions Runner from a local Docker registry. This avoids downloading the runner during setup.
+
+### 1) Build and publish the runner image (instructor)
+
+Files:
+
+- `runner-image/Dockerfile`
+- `runner-image/entrypoint.sh`
+
+Build and push to Docker Hub:
+
+```bash
+cd runner-image
+docker build -t <DOCKERHUB_USER>/gha-runner:2.328.0 .
+docker push <DOCKERHUB_USER>/gha-runner:2.328.0
+```
+
+Optional: host in a local registry for your lab server:
+
+```bash
+docker run -d --restart=always -p 5000:5000 --name registry registry:2
+docker pull <DOCKERHUB_USER>/gha-runner:2.328.0
+docker tag <DOCKERHUB_USER>/gha-runner:2.328.0 localhost:5000/gha-runner-new:2.328.0
+docker push localhost:5000/gha-runner:2.328.0
+```
+
+If clients use an insecure local registry, configure `/etc/docker/daemon.json` on each client:
+
+```json
+# on student machine (one-time)
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json >/dev/null <<'JSON'
+{
+  "insecure-registries": ["192.168.3.134:5000"],
+  "registry-mirrors": ["192.168.3.134:5000"]
+}
+JSON
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+
+```
+# Print the best-guess LAB Ip
+
+```bash
+ip route get 8.8.8.8 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src"){print $(i+1); exit}}' \
+  || hostname -I | awk '{print $1}'
+
+```
+
+### 2) Provision the containerized runner (students)
+
+Export the required environment variables on the controller (the machine running Ansible):
+
+```bash
+export GITHUB_REPO="<your-username>/<your-repo>"
+# One of the two below must be provided
+export GITHUB_PAT="<token with repo+workflow scopes>"   # or
+export RUNNER_TOKEN="<repo runner token>"
+```
+
+Run the Ansible playbook:
+
+```bash
+cd ansible
+ansible-playbook install_github_runner_container.yml --extra-vars 'runner_labels=self-hosted,lab,mytag runner_workdir=/runner/_work' -e "image_ref=192.168.1.15:5000/gha-runner-new:2.328.0"
+```
+
+By default the playbook pulls `localhost:5000/gha-runner:2.328.0`. Change `image_ref` in `ansible/install_github_runner_container.yml` to use your Docker Hub image if you prefer.
+
+### 3) Verify
+
+Check that the container is running on the target VM and appears as a self-hosted runner in your GitHub repo settings.
+
+```bash
+docker ps -a | grep gha-runner
+
+docker logs -a gha-runner
+```
+
+### Notes
+
+- The container’s entrypoint registers the runner on start and unregisters it on stop.
+- If your workflows need Docker access, the playbook mounts `/var/run/docker.sock` into the container.
 
 
 
