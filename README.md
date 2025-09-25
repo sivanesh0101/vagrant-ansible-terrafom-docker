@@ -72,6 +72,12 @@ The goal is to give students a **hands-on CI/CD experience** where pushing code 
   ```bash
   ansible --version
   ```
+
+  ```bash
+  ansible all -m ping
+
+  ```
+
    You should see similar output.
   
    <img width="1150" height="245" alt="image" src="https://github.com/user-attachments/assets/5f958dce-977d-477f-9aab-78ac2cd9be49" />
@@ -191,6 +197,160 @@ vagrant ssh
     terraform destroy --auto-approve
     ```
    <img width="1273" height="280" alt="image" src="https://github.com/user-attachments/assets/c895a070-9d11-4634-bc83-8b8e112e93dc" />
+
+
+---
+### **Additional Terraform Tasks**
+
+
+## 🟢 Simple Terraform Tasks
+
+### 1. **Hello World with Terraform**
+
+* Create a file `main.tf`.
+* Define a provider (like Docker).
+* Just run `terraform init` + `terraform plan`.
+  👉 Goal: Get used to Terraform commands.
+
+---
+
+### 2. **Create a Local File**
+
+```hcl
+resource "local_file" "example" {
+  content  = "Hello from Terraform!"
+  filename = "hello.txt"
+}
+```
+
+👉 Task: Run `terraform apply` → check that `hello.txt` is created.
+
+---
+
+### 3. **Deploy a Docker Nginx Container**
+
+```hcl
+provider "docker" {}
+
+resource "docker_image" "nginx" {
+  name = "nginx:latest"
+}
+
+resource "docker_container" "nginx" {
+  image = docker_image.nginx.latest
+  name  = "nginx-server"
+  ports {
+    internal = 80
+    external = 8080
+  }
+}
+```
+
+👉 Task: Run `terraform apply`, then open `http://localhost:8080`.
+
+---
+
+### 4. **Create Two Docker Containers**
+
+* Use Nginx (port 8081) and Redis (port 6379).
+* Just like the **multi-container setup** we discussed earlier, but simpler.
+
+👉 Task: Verify with `docker ps`.
+
+---
+
+### 5. **Variable Usage**
+
+```hcl
+variable "instance_name" {
+  default = "my-container"
+}
+
+resource "docker_container" "nginx" {
+  image = docker_image.nginx.latest
+  name  = var.instance_name
+  ports {
+    internal = 80
+    external = 8082
+  }
+}
+```
+
+👉 Task: Change the variable value → reapply → container should have new name.
+
+---
+
+### 6. **Destroy & Reapply**
+
+* Run `terraform destroy` to remove resources.
+* Run `terraform apply` again to recreate.
+  👉 Task: Learn how IaC makes infra reproducible.
+
+---
+
+### **Challenge Tasks**
+
+
+### 1. **Deploy Two Nginx Containers on Different Ports**
+
+* Use Terraform to run **two Nginx containers**.
+* Map them to ports `8081` and `8082`.
+  👉 Challenge: Check both in the browser.
+
+---
+
+### 2. **Use a Variable for Container Name**
+
+* Create a variable called `container_name`.
+* Use it in your container resource.
+  👉 Challenge: Change the variable and see Terraform rename the container.
+
+---
+
+### 3. **Create a Simple Local File**
+
+```hcl
+resource "local_file" "note" {
+  content  = "Terraform is fun!"
+  filename = "note.txt"
+}
+```
+
+👉 Challenge: Run `terraform apply`, then `terraform destroy` to see how IaC manages files.
+
+---
+
+### 4. **Count Challenge – Multiple Containers**
+
+* Use `count = 3` in your resource block.
+* Spin up **3 Nginx containers**.
+  👉 Challenge: Name them `nginx-1`, `nginx-2`, `nginx-3`.
+
+---
+
+### 5. **Custom HTML in Nginx**
+
+* Create a local `index.html` file.
+* Mount it into the Nginx container using Terraform volume mapping.
+  👉 Challenge: Show a custom welcome page in the browser.
+
+---
+
+### 6. **Output Challenge**
+
+* Add an `output.tf` file.
+* Print the container’s **name** and **port** after `terraform apply`.
+  👉 Challenge: Verify outputs appear on screen.
+
+---
+
+### 7. **Destroy & Recreate**
+
+* Deploy a container.
+* Run `terraform destroy`.
+* Run `terraform apply` again.
+  👉 Challenge: Notice how Terraform recreates the same resource automatically.
+
 
 
 ---
@@ -403,7 +563,7 @@ Run the Ansible playbook:
 
 ```bash
 cd ansible
-ansible-playbook install_github_runner_container.yml --extra-vars 'runner_labels=self-hosted,lab,mytag runner_workdir=/runner/_work' -e "image_ref=192.168.1.15:5000/gha-runner-new:2.328.0"
+ansible-playbook install_github_runner_container.yml --extra-vars 'runner_labels=self-hosted,lab,mytag runner_workdir=/runner/_work' -e "image_ref=deenamanick/gha-runner-new:2.328.0"
 ```
 
 By default the playbook pulls `localhost:5000/gha-runner:2.328.0`. Change `image_ref` in `ansible/install_github_runner_container.yml` to use your Docker Hub image if you prefer.
