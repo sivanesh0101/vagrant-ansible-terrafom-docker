@@ -4,11 +4,31 @@ terraform {
       source  = "kreuzwerker/docker"
       version = "= 3.6.2"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
   }
 }
 
 provider "docker" {
   host = "unix:///var/run/docker.sock"
+}
+
+resource "random_string" "name_suffix" {
+  length  = 6
+  upper   = false
+  special = false
+}
+
+resource "random_integer" "host_port" {
+  min = 8000
+  max = 8999
+}
+
+locals {
+  effective_container_name = coalesce(var.container_name, "quiz_app_${random_string.name_suffix.result}")
+  effective_external_port  = coalesce(var.external_port, random_integer.host_port.result)
 }
 
 # Pull a prebuilt image from Docker Hub (or any registry)
@@ -19,14 +39,14 @@ resource "docker_image" "quiz_app" {
 
 # Run the IaC Quiz app container
 resource "docker_container" "quiz_app" {
-  name     = var.container_name
+  name     = local.effective_container_name
   image    = docker_image.quiz_app.image_id
   must_run = true
   restart  = "always"
 
   ports {
     internal = 8080
-    external = var.external_port
+    external = local.effective_external_port
   }
 
   lifecycle {
