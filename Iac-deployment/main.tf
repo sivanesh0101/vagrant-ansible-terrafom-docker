@@ -19,14 +19,14 @@ resource "docker_image" "quiz_app" {
 
 # Run the IaC Quiz app container
 resource "docker_container" "quiz_app" {
-  name     = "quiz_app"
+  name     = var.container_name
   image    = docker_image.quiz_app.image_id
   must_run = true
   restart  = "always"
 
   ports {
     internal = 8080
-    external = 8080
+    external = var.external_port
   }
 
   lifecycle {

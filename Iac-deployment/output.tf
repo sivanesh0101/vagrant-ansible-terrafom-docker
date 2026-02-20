@@ -3,5 +3,5 @@
 # }
 
 output "quiz_app_url" {
-  value = "http://${var.vm_ip}:${var.app_port}"
+  value = "http://${var.vm_ip}:${var.external_port}"
 }
