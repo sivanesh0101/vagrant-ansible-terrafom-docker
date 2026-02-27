@@ -2,6 +2,7 @@
 * text=auto eol=lf
 
 # Scripts and infra files must be LF
+ Vagrantfile text eol=lf
 *.sh text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf

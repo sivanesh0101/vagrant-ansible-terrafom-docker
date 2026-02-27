@@ -17,9 +17,14 @@ variable "image" {
   default     = "deenamanick/iac-quiz:v1"
 }
 
-# Host port to expose the app on (maps to container port 8080)
+variable "container_name" {
+  type        = string
+  description = "Docker container name to create (must be unique on the VM)"
+  default     = null
+}
+
 variable "external_port" {
   type        = number
   description = "Host port to map to container's 8080"
-  default     = 8080
+  default     = null
 }

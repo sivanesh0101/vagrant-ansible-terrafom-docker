@@ -2,7 +2,11 @@ terraform {
   required_providers {
     docker = {
       source  = "kreuzwerker/docker"
+<<<<<<< HEAD
       version = "~> 3.6"
+=======
+      version = "= 3.6.2"
+>>>>>>> 8688b72ed9ba08201c956de9c5fe05cb429146fb
     }
   }
 }
@@ -32,14 +36,14 @@ resource "docker_image" "quiz_app" {
 
 ## running docker
 resource "docker_container" "quiz_app" {
-  name  = "quiz_app"
+  name  = var.container_name
   image = docker_image.quiz_app.image_id
   must_run = true
   restart = "always"
 
   ports {
     internal = 8080
-    external = 8080
+    external = var.external_port
   }
 
   lifecycle {
