@@ -313,7 +313,8 @@ cat <<'EOF' >  /home/vagrant/ansible/install_github_runner_container.yml
   become: yes
 
   vars:
-    image_ref: "192.168.1.15:5000/gha-runner-new:2.328.0"   # updated to your pushed image
+   # image_ref: "192.168.1.15:5000/gha-runner-new:2.328.0"   # updated to your pushed image
+    image_ref: "deenamanick/my-github-runner:latest"   # updated to your pushed image
     container_name: "gha-runner"
     runner_labels: "self-hosted,lab"
     runner_workdir: "/runner/_work"
