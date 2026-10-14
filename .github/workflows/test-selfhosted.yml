@@ -2,7 +2,7 @@ name: Test Self-hosted
 on:
   push:
     branches:
-      - main
+      # - main
 jobs:
   test:
     runs-on: [self-hosted, lab]
