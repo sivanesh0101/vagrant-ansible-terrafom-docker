@@ -166,7 +166,7 @@ EOF
 cat <<'EOF' >  /home/vagrant/ansible/install_github_runner.yml
 ---
 - name: Install GitHub Actions Runner
-  hosts: all
+  hosts: runner
   become: yes
 
   vars:
@@ -233,6 +233,13 @@ cat <<'EOF' >  /home/vagrant/ansible/install_github_runner.yml
         owner: vagrant
         group: vagrant
 
+    - name: Symlink bundled node to system PATH
+      file:
+        src: "{{ runner_dir }}/externals/node20/bin/node"
+        dest: "/usr/local/bin/node"
+        state: link
+        force: yes
+
     - name: Request registration token from GitHub API (with retries)
       uri:
         url: "https://api.github.com/repos/{{ github_repo }}/actions/runners/registration-token"
@@ -257,9 +264,10 @@ cat <<'EOF' >  /home/vagrant/ansible/install_github_runner.yml
       become_user: vagrant
 
     - name: Install runner as service
-      command: ./svc.sh install
+      command: ./svc.sh install vagrant
       args:
         chdir: "{{ runner_dir }}"
+        creates: "{{ runner_dir }}/.service"
 
     - name: Start runner service
       command: ./svc.sh start
