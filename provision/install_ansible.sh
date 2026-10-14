@@ -172,7 +172,7 @@ cat <<'EOF' >  /home/vagrant/ansible/install_github_runner.yml
   vars:
     # github_repo: "deenamanick/vagrant-ansible-terrafom-docker"
     github_repo: "{{ lookup('env','GITHUB_REPO') }}"
-    runner_version: "2.328.0"
+    runner_version: "2.329.0"
     runner_dir: "/opt/actions-runner"
     github_pat: "{{ lookup('env','GITHUB_PAT') }}"
     cache_dir: "/home/vagrant/ansible/cache"   # cache on controller
@@ -223,7 +223,7 @@ cat <<'EOF' >  /home/vagrant/ansible/install_github_runner.yml
         src: "{{ runner_dir }}/runner.tar.gz"
         dest: "{{ runner_dir }}"
         remote_src: yes
-        creates: "{{ runner_dir }}/config.sh"
+        creates: "{{ runner_dir }}/bin/Runner.Listener"
 
     - name: Ensure runner directory owned by vagrant
       file:
@@ -253,6 +253,7 @@ cat <<'EOF' >  /home/vagrant/ansible/install_github_runner.yml
         --token {{ reg_token.json.token }} --unattended
       args:
         chdir: "{{ runner_dir }}"
+        creates: "{{ runner_dir }}/.runner"
       become_user: vagrant
 
     - name: Install runner as service

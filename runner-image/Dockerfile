@@ -4,7 +4,7 @@
 FROM ubuntu:22.04 as base
 
 # Re-declare build args in this stage so they are visible to ENV/RUN
-ARG RUNNER_VERSION=2.328.0
+ARG RUNNER_VERSION=2.329.0
 ARG RUNNER_ARCH
 
 ENV DEBIAN_FRONTEND=noninteractive \
