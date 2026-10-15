@@ -304,7 +304,7 @@ cat <<'EOF' >  /home/vagrant/ansible/install_github_runner.yml
 EOF
 
 # Task 6 - Install GitHub Runner in container.yml
-## How to run -- ansible-playbook install_github_runner_container.yml --extra-vars 'runner_labels=self-hosted,lab,mytag runner_workdir=/runner/_work' -e "image_ref=192.168.1.15:5000/gha-runner-new:2.328.0"
+## How to run -- ansible-playbook install_github_runner_container.yml --extra-vars 'runner_labels=self-hosted,lab,mytag runner_workdir=/runner/_work' -e "image_ref=192.168.1.15:5000/gha-runner-new:2.329.0"
 
 ## Post check - docker logs -f gha-runner
 
@@ -322,7 +322,7 @@ cat <<'EOF' >  /home/vagrant/ansible/install_github_runner_container.yml
   become: yes
 
   vars:
-   # image_ref: "192.168.1.15:5000/gha-runner-new:2.328.0"   # updated to your pushed image
+   # image_ref: "192.168.1.15:5000/gha-runner-new:2.329.0"   # updated to your pushed image
     image_ref: "deenamanick/my-github-runner:latest"   # updated to your pushed image
     container_name: "gha-runner"
     runner_labels: "self-hosted,lab"
