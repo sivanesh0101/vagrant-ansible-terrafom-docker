@@ -166,13 +166,13 @@ EOF
 cat <<'EOF' >  /home/vagrant/ansible/install_github_runner.yml
 ---
 - name: Install GitHub Actions Runner
-  hosts: all
+  hosts: runner
   become: yes
 
   vars:
     # github_repo: "deenamanick/vagrant-ansible-terrafom-docker"
     github_repo: "{{ lookup('env','GITHUB_REPO') }}"
-    runner_version: "2.328.0"
+    runner_version: "2.329.0"
     runner_dir: "/opt/actions-runner"
     github_pat: "{{ lookup('env','GITHUB_PAT') }}"
     cache_dir: "/home/vagrant/ansible/cache"   # cache on controller
@@ -223,7 +223,7 @@ cat <<'EOF' >  /home/vagrant/ansible/install_github_runner.yml
         src: "{{ runner_dir }}/runner.tar.gz"
         dest: "{{ runner_dir }}"
         remote_src: yes
-        creates: "{{ runner_dir }}/config.sh"
+        creates: "{{ runner_dir }}/bin/Runner.Listener"
 
     - name: Ensure runner directory owned by vagrant
       file:
@@ -232,6 +232,13 @@ cat <<'EOF' >  /home/vagrant/ansible/install_github_runner.yml
         recurse: yes
         owner: vagrant
         group: vagrant
+
+    - name: Symlink bundled node to system PATH
+      file:
+        src: "{{ runner_dir }}/externals/node20/bin/node"
+        dest: "/usr/local/bin/node"
+        state: link
+        force: yes
 
     - name: Request registration token from GitHub API (with retries)
       uri:
@@ -253,12 +260,14 @@ cat <<'EOF' >  /home/vagrant/ansible/install_github_runner.yml
         --token {{ reg_token.json.token }} --unattended
       args:
         chdir: "{{ runner_dir }}"
+        creates: "{{ runner_dir }}/.runner"
       become_user: vagrant
 
     - name: Install runner as service
-      command: ./svc.sh install
+      command: ./svc.sh install vagrant
       args:
         chdir: "{{ runner_dir }}"
+        creates: "{{ runner_dir }}/.service"
 
     - name: Start runner service
       command: ./svc.sh start
@@ -295,7 +304,7 @@ cat <<'EOF' >  /home/vagrant/ansible/install_github_runner.yml
 EOF
 
 # Task 6 - Install GitHub Runner in container.yml
-## How to run -- ansible-playbook install_github_runner_container.yml --extra-vars 'runner_labels=self-hosted,lab,mytag runner_workdir=/runner/_work' -e "image_ref=192.168.1.15:5000/gha-runner-new:2.328.0"
+## How to run -- ansible-playbook install_github_runner_container.yml --extra-vars 'runner_labels=self-hosted,lab,mytag runner_workdir=/runner/_work' -e "image_ref=192.168.1.15:5000/gha-runner-new:2.329.0"
 
 ## Post check - docker logs -f gha-runner
 
@@ -313,7 +322,7 @@ cat <<'EOF' >  /home/vagrant/ansible/install_github_runner_container.yml
   become: yes
 
   vars:
-   # image_ref: "192.168.1.15:5000/gha-runner-new:2.328.0"   # updated to your pushed image
+   # image_ref: "192.168.1.15:5000/gha-runner-new:2.329.0"   # updated to your pushed image
     image_ref: "deenamanick/my-github-runner:latest"   # updated to your pushed image
     container_name: "gha-runner"
     runner_labels: "self-hosted,lab"
