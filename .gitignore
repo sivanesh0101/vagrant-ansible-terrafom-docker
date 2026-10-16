@@ -15,7 +15,7 @@
 *.pem
 *.key
 .env
-
+actions-runner-linux-x64-2.337.0.tar.gz
 # Python
 __pycache__/
 *.pyc
