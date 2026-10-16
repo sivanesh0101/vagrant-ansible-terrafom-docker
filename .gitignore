@@ -97,3 +97,5 @@ Thumbs.db
  .profile
  .terraform.d/checkpoint_cache
  .terraform.d/checkpoint_signature
+#
+actions-runner-linux-x64-2.337.0.tar.gz
